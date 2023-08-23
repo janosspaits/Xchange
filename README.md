@@ -8,6 +8,8 @@ tkinter documentation: https://docs.python.org/3/library/tkinter.html
 
 forex python documentaion: https://forex-python.readthedocs.io/en/latest/usage.html
 
+CustomTkinter!!! : https://www.youtube.com/watch?v=JDU-ycsxvqM&list=PLCC34OHNcOtoC6GglhF3ncJ5rLwQrLGnV&index=220
+
 # Helpers
 
 c.get_symbol('GBP')
