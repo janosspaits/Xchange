@@ -1,33 +1,8 @@
+import install_requirements
 from forex_python.converter import CurrencyRates, CurrencyCodes
 from datetime import datetime
 from tkinter import *
 import customtkinter
-import subprocess
-import pkg_resources
-
-
-# Automatic Python package installer
-def check_requirements(requirements_file='requirements.txt'):
-    with open(requirements_file, 'r', encoding='utf-8') as file:
-        requirements = [line.strip() for line in file.readlines()]
-
-    installed_packages = {pkg.key: pkg.version for pkg in pkg_resources.working_set}
-
-    for requirement in requirements:
-        req = pkg_resources.Requirement.parse(requirement)
-        if req.key not in installed_packages:
-            print(f"The package '{req.key}' is not installed.")
-            install_package(requirement)
-        else:
-            print(f"The package '{req.key}' is installed.")
-
-
-def install_package(requirement):
-    subprocess.run(['pip', 'install', requirement])
-    print(f"The requirement '{requirement}' has been installed.")
-
-
-check_requirements()
 
 
 now = datetime.now()
