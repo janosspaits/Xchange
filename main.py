@@ -1,73 +1,129 @@
 from forex_python.converter import CurrencyRates, CurrencyCodes
 from datetime import datetime
 from tkinter import *
+import customtkinter
+import subprocess
+import pkg_resources
+
+
+# Automatic Python package installer
+def check_requirements(requirements_file='requirements.txt'):
+    with open(requirements_file, 'r', encoding='utf-8') as file:
+        requirements = [line.strip() for line in file.readlines()]
+
+    installed_packages = {pkg.key: pkg.version for pkg in pkg_resources.working_set}
+
+    for requirement in requirements:
+        req = pkg_resources.Requirement.parse(requirement)
+        if req.key not in installed_packages:
+            print(f"The package '{req.key}' is not installed.")
+            install_package(requirement)
+        else:
+            print(f"The package '{req.key}' is installed.")
+
+
+def install_package(requirement):
+    subprocess.run(['pip', 'install', requirement])
+    print(f"The requirement '{requirement}' has been installed.")
+
+
+check_requirements()
+
 
 now = datetime.now()
 c = CurrencyRates()
 currency_codes = CurrencyCodes()
 
-window = Tk()
+customtkinter.set_appearance_mode("Dark")
+customtkinter.set_default_color_theme("blue")
+
+window = customtkinter.CTk()
 window.title("X-Change")
-window.geometry("630x230")
+window.geometry("780x270")
 window.iconbitmap("dollarico.ico")
-
-instructions = Label(text="Enter the amount:", font=("Arial", 12, "bold"))
-instructions.grid(row=0, column=1, columnspan=2)
-
 
 currency_options = [
     f"{code} - \n{currency_codes.get_currency_name(code)}" for code in ["GBP", "USD", "EUR", "CHF", "AUD", "CAD", "HUF",
-                                                                        "JPY", "CNY", "HKD"]
+                                                                        "JPY", "CNY", "HKD", "DKK", "PLN", "TRY", "KRW",
+                                                                        "ZAR"]
 ]
 
 
+def change_appearance_mode_event(new_appearance_mode):
+    """Changes appearance mode to light/dark"""
+    customtkinter.set_appearance_mode(new_appearance_mode)
+
+
 def perform_conversion():
-    global result_label
+    """This is the function that performs the conversion"""
+    global result_textbox
     start_currency = start_cur.get().split(' ')[0]
     end_currency = end_cur.get().split(' ')[0]
 
     if not money_entered.get().strip():
-        result_label.delete('1.0', '1.100')
-        result_label.insert('1.0', "Please enter an amount.")
+        result_textbox.delete('1.0', '1.100')
+        result_textbox.insert('1.0', "Please enter an amount.")
         return
 
     try:
         money = float(money_entered.get())
     except ValueError:
-        result_label.delete('1.0', '1.100')
-        result_label.insert('1.0', "Invalid amount entered.")
+        result_textbox.delete('1.0', '1.100')
+        result_textbox.insert('1.0', "Invalid amount entered.")
         return
 
     try:
         result = c.get_rate(start_currency, end_currency, now) * money
-        result_label.delete('1.0', '1.100')
-        result_label.insert('1.0', f"{money} {start_currency} = {round(result, 3)} {end_currency}")
+        result_textbox.delete('1.0', '1.100')
+        result_textbox.insert('1.0', f"{money} {start_currency} = {round(result, 3)} {end_currency}")
     except Exception as e:
         print(f"Error: {e}")
-        result_label.delete('1.0', '1.100')
-        result_label.insert('1.0', f"Error: {e}")
+        result_textbox.delete('1.0', '1.100')
+        result_textbox.insert('1.0', f"Error: {e}")
 
 
-money_entered = Entry(width=10)
-money_entered.grid(row=1, column=1, pady=5, columnspan=2)
+# Start amount entry box
+money_entered = customtkinter.CTkEntry(master=window, width=180, height=35, border_width=2, corner_radius=5,
+                                       placeholder_text="Enter the amount", placeholder_text_color="silver",
+                                       font=('Arial', 16, 'bold'), justify='center')
+money_entered.grid(row=1, column=1, pady=15, columnspan=2)
 
+# Start currency button
 start_cur = StringVar()
 start_cur.set("Choose a Currency\n to convert from")
-start_drop = OptionMenu(window, start_cur, *currency_options)
-start_drop.configure(width=18)
+start_drop = customtkinter.CTkOptionMenu(window, width=200, height=50, variable=start_cur, values=currency_options,
+                                         dropdown_font=('Arial', 12), dynamic_resizing=False, anchor='center',
+                                         font=('Arial', 14, 'bold'), corner_radius=7)
 start_drop.grid(row=2, column=0, padx=20, pady=10)
 
+# End currency button
 end_cur = StringVar()
 end_cur.set("Choose a Currency\n to convert to")
-end_drop = OptionMenu(window, end_cur, *currency_options)
-end_drop.configure(width=18)
-end_drop.grid(row=2, column=5, pady=10, padx=10)
+end_drop = customtkinter.CTkOptionMenu(window, width=200, height=50, variable=end_cur, values=currency_options,
+                                       dropdown_font=('Arial', 12), dynamic_resizing=False, anchor='center',
+                                       font=('Arial', 14, 'bold'), corner_radius=7)
+end_drop.grid(row=2, column=5, pady=10, padx=20)
 
-result_label = Text(window, font=("Arial", 10, "bold"), width=35, height=1)
-result_label.grid(row=3, column=1, pady=15, columnspan=2)
 
-convert_button = Button(window, text="Convert", command=perform_conversion, height=2, width=8)
+# Result Textbox
+result_textbox = customtkinter.CTkTextbox(window, font=("Arial", 16, "bold"), width=300, height=35, border_width=2)
+result_textbox.grid(row=3, column=1, pady=15, columnspan=2)
+result_textbox.delete('1.0', '1.100')
+result_textbox.insert('1.0', '                              Result')
+
+
+# Convert button
+convert_button = customtkinter.CTkButton(master=window, width=120, height=40, text="Convert",
+                                         command=perform_conversion, corner_radius=7, font=('Arial', 16, 'bold'))
 convert_button.grid(row=4, column=1, pady=10, columnspan=2)
+
+
+# Dark mode switch
+switch_var = customtkinter.StringVar(value="Dark")
+appearance_option = customtkinter.CTkSwitch(window, onvalue="Dark", offvalue="Light", width=80, text="Dark mode",
+                                            command=lambda: change_appearance_mode_event(appearance_option.get()),
+                                            variable=switch_var)
+appearance_option.grid(row=4, column=0, ipadx=50)
 
 
 window.mainloop()
