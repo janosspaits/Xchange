@@ -1,11 +1,37 @@
-import install_requirements
 from forex_python.converter import CurrencyRates, CurrencyCodes
 from datetime import datetime
 from tkinter import *
 import customtkinter
+import subprocess
+import pkg_resources
+
+
+# Automatic Python package installer
+def check_requirements(requirements_file='requirements.txt'):
+    with open(requirements_file, 'r', encoding='utf-8') as file:
+        requirements = [line.strip() for line in file.readlines()]
+
+    installed_packages = {pkg.key: pkg.version for pkg in pkg_resources.working_set}
+
+    for requirement in requirements:
+        req = pkg_resources.Requirement.parse(requirement)
+        if req.key not in installed_packages:
+            print(f"The package '{req.key}' is not installed.")
+            install_package(requirement)
+        else:
+            print(f"The package '{req.key}' is installed.")
+
+
+def install_package(requirement):
+    subprocess.run(['pip', 'install', requirement])
+    print(f"The requirement '{requirement}' has been installed.")
+
+
+check_requirements()
 
 
 now = datetime.now()
+today = datetime.today().date()
 c = CurrencyRates()
 currency_codes = CurrencyCodes()
 
@@ -48,7 +74,7 @@ def perform_conversion():
         return
 
     try:
-        result = c.get_rate(start_currency, end_currency, now) * money
+        result = c.convert(base_cur=start_currency, dest_cur=end_currency, amount=money, date_obj=today)
         result_textbox.delete('1.0', '1.100')
         result_textbox.insert('1.0', f"{money} {start_currency} = {round(result, 3)} {end_currency}")
     except Exception as e:
@@ -99,6 +125,14 @@ appearance_option = customtkinter.CTkSwitch(window, onvalue="Dark", offvalue="Li
                                             command=lambda: change_appearance_mode_event(appearance_option.get()),
                                             variable=switch_var)
 appearance_option.grid(row=4, column=0, ipadx=50)
+
+rows = 4
+columns = 5
+
+for i in range(rows):
+    window.grid_rowconfigure(i , weight=1)
+for i in range(columns):
+    window.grid_columnconfigure(i, weight=1)
 
 
 window.mainloop()
