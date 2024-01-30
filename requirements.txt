@@ -4,5 +4,5 @@ forex-python==1.8
 idna==3.4
 requests==2.31.0
 simplejson==3.19.1
-urllib3==2.0.6
+urllib3==2.0.7
 customtkinter~=5.2.0
